@@ -1,6 +1,7 @@
 package org.tyaa.kotlin.coroutines
 
 import kotlinx.coroutines.*
+import sun.misc.GC
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
@@ -9,8 +10,9 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.seconds
 
 // import org.tyaa.kotlin.coroutines.Workers.useWorkerAsync
-
+// fun main() {
 suspend fun main() {
+// suspend fun main() = runBlocking {
     /* 1 */
     /*println("Start")
     // Start a coroutine
@@ -70,28 +72,35 @@ suspend fun main() {
     /* 5a */
     // profileThreads()
     // profileCoroutines ()
-    profile("Threads") {
+
+    /*profile("Threads") {
         GlobalScope.launch {
             println(profileThreads2().await())
         }
-    }
-    profile("Coroutines") {
+    }*/
+    /* profile("Coroutines") {
         GlobalScope.launch {
             println(profileCoroutines2().await())
         }
     }
 
-    delay(3000)
+    profile("Threads") {
+        GlobalScope.launch {
+            println(profileThreads2().await())
+        }
+    } */
+
+    // delay(3000)
 
     /* 6 */
-    /* GlobalScope.launch { // launch a new coroutine in background and continue
+    GlobalScope.launch { // launch a new coroutine in background and continue
         delay(1000L)
         println("World!")
     }
     println("Hello,") // main thread continues here immediately
     runBlocking {     // but this expression blocks the main thread
         delay(2000L)  // ... while we delay for 2 seconds to keep JVM alive
-    } */
+    }
 
     /* 7 */
     // uncomment '5b' and use the test folder
@@ -113,55 +122,60 @@ suspend fun main() {
 } */
 
 /* 5b */
-fun profile (tag: String, function: () -> Unit) {
-    val startTime = System.currentTimeMillis()
-    function()
-    println("$tag: ${(System.currentTimeMillis() - startTime) / 1000}")
-}
-
-fun profileThreads () {
-    val c = AtomicInteger()
-    for (i in 1..1_000_000)
-        thread(start = true) {
-            c.addAndGet(i)
-        }.join()
-    println(c.get())
-}
-
-fun profileCoroutines () {
-    val c = AtomicInteger()
-
-    for (i in 1..1_000_000)
-        GlobalScope.launch {
-            c.addAndGet(i)
-        }
-
-    println(c.get())
-}
-
-fun profileThreads2 () = GlobalScope.async {
-    val c = AtomicInteger()
-    runBlocking {
-        for (i in 1..100_000) {
-            thread(start = true) {
-                c.addAndGet(i)
-            }.join()
-        }
-    }
-    c.get()
-}
-
-fun profileCoroutines2 () = GlobalScope.async {
-    val c = (1..100_000).map { n ->
-        GlobalScope.async {
-            // delay(1000)
-            n
-        }
-    }
-    var sum = 0
-    runBlocking {
-        sum = c.sumBy { it.await() }
-        // println("Sum: $sum")
-    }
-    sum
-}
+// fun profile(tag: String, function: () -> Unit) {
+//fun profile(tag: String, function: () -> Job) {
+//    val startTime = System.currentTimeMillis()
+//    val startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+//    runBlocking {
+//        function().join()
+//    }
+//    val endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+//    println("$tag: ${System.currentTimeMillis() - startTime} ms and ${startMemory - endMemory} bytes")
+//}
+//
+//fun profileThreads () {
+//    val c = AtomicInteger()
+//    for (i in 1..1_000_000)
+//        thread(start = true) {
+//            c.addAndGet(i)
+//        }.join()
+//    println(c.get())
+//}
+//
+//fun profileCoroutines () {
+//    val c = AtomicInteger()
+//
+//    for (i in 1..1_000_000)
+//        GlobalScope.launch {
+//            c.addAndGet(i)
+//        }
+//
+//    println(c.get())
+//}
+//
+//fun profileThreads2 () = GlobalScope.async {
+//    val c = AtomicInteger()
+//    runBlocking {
+//        for (i in 1..100_000) {
+//            thread(start = true) {
+//                c.addAndGet(i)
+//            }.join()
+//        }
+//    }
+//    c.get()
+//}
+//
+//fun profileCoroutines2 () = GlobalScope.async {
+//    val c = (1..100_000).map { n ->
+//        GlobalScope.async {
+//            // delay(1000)
+//            n
+//        }
+//    }
+//    var sum = 0
+//    runBlocking {
+//        sum = c.sumBy { it.await() }
+//        // println("Sum: $sum")
+//    }
+//    sum
+//}

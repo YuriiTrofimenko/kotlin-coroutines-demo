@@ -12,9 +12,9 @@ class MainTest {
     @Test
     fun workerTestCase() = runBlocking<Unit> () {
         var result = 0
-        GlobalScope.launch {
+        //GlobalScope.launch {
             result = profileCoroutines2().await()
-        }.join()
+        //}.join()
         println(result)
         assert(result == 705082704)
         // assert(result == 0)

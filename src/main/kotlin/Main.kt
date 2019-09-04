@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
+import kotlin.coroutines.coroutineContext
 import kotlin.time.ExperimentalTime
 import kotlin.time.seconds
 
@@ -69,8 +70,18 @@ suspend fun main() {
     /* 5a */
     // profileThreads()
     // profileCoroutines ()
-    // profile("Threads") { profileThreads() }
-    // profile("Coroutines") { profileCoroutines() }
+    profile("Threads") {
+        GlobalScope.launch {
+            println(profileThreads2().await())
+        }
+    }
+    profile("Coroutines") {
+        GlobalScope.launch {
+            println(profileCoroutines2().await())
+        }
+    }
+
+    delay(3000)
 
     /* 6 */
     /* GlobalScope.launch { // launch a new coroutine in background and continue
@@ -107,12 +118,13 @@ fun profile (tag: String, function: () -> Unit) {
     function()
     println("$tag: ${(System.currentTimeMillis() - startTime) / 1000}")
 }
+
 fun profileThreads () {
     val c = AtomicInteger()
     for (i in 1..1_000_000)
         thread(start = true) {
             c.addAndGet(i)
-        }
+        }.join()
     println(c.get())
 }
 
@@ -125,4 +137,31 @@ fun profileCoroutines () {
         }
 
     println(c.get())
+}
+
+fun profileThreads2 () = GlobalScope.async {
+    val c = AtomicInteger()
+    runBlocking {
+        for (i in 1..100_000) {
+            thread(start = true) {
+                c.addAndGet(i)
+            }.join()
+        }
+    }
+    c.get()
+}
+
+fun profileCoroutines2 () = GlobalScope.async {
+    val c = (1..100_000).map { n ->
+        GlobalScope.async {
+            // delay(1000)
+            n
+        }
+    }
+    var sum = 0
+    runBlocking {
+        sum = c.sumBy { it.await() }
+        // println("Sum: $sum")
+    }
+    sum
 }
